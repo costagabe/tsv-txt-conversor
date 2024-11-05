@@ -20,6 +20,12 @@ const readFile = () => {
 
 const questions = ref<Array<Array<{ question: string; answer: string }>>>([]);
 
+const pacients = computed(() =>
+  questions.value.map((v, i) => ({ label: `Paciente ${i + 1}`, value: i })),
+);
+
+const questionsComputed = computed(() => [questions.value[selected.value]]);
+
 const convert = () => {
   const lines = fileContent.value.split("\n");
   const headers = lines[0].split("\t");
@@ -35,7 +41,7 @@ const convert = () => {
 
   setTimeout(() => copyText(), 500);
 };
-
+const selected = ref(0);
 const copyText = async () => {
   try {
     // Obtém o HTML interno da div
@@ -99,9 +105,15 @@ const copyText = async () => {
             <h4>Texto enviado para a área de transferência!</h4></v-card-title
           >
           <v-divider></v-divider>
+          <v-select
+            v-model="selected"
+            item-title="label"
+            item-value="value"
+            label="Selecione o paciente"
+            :items="pacients"
+          />
           <v-card-text id="to-copy">
-            <template v-for="(question, i) in questions">
-              <h1>Questionário {{ i + 1 }}</h1>
+            <template v-for="(question, i) in questionsComputed">
               <v-row v-for="qa in question" no-gutters>
                 <v-col cols="12">
                   <h3>
