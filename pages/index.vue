@@ -142,7 +142,6 @@ const copyText = async () => {
                 <v-col cols="12">
                   {{ qa.answer }}
                 </v-col>
-                <v-divider class="my-2" />
               </v-row>
             </template>
           </v-card-text>
