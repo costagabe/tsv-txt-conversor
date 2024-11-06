@@ -21,7 +21,10 @@ const readFile = () => {
 const questions = ref<Array<Array<{ question: string; answer: string }>>>([]);
 
 const pacients = computed(() =>
-  questions.value.map((v, i) => ({ label: `Paciente ${i + 1}`, value: i })),
+  questions.value.map((v, i) => ({
+    label: v[validNamePosition.value].answer,
+    value: i,
+  })),
 );
 
 const questionsComputed = computed(() => [questions.value[selected.value]]);
@@ -38,10 +41,15 @@ const convert = () => {
         .map((answer, i) => ({ question: headers[i], answer }))
         .filter((v) => !!v.answer),
     );
-
-  setTimeout(() => copyText(), 500);
 };
-const selected = ref(0);
+
+const selected = ref();
+const namePosition = ref(3);
+
+const validNamePosition = computed(() => namePosition.value - 1 || 0);
+
+watch(selected, () => setTimeout(copyText, 200));
+
 const copyText = async () => {
   try {
     // Obtém o HTML interno da div
@@ -51,7 +59,6 @@ const copyText = async () => {
     const blob = new Blob([html], { type: "text/html" });
     const clipboardItem = new ClipboardItem({ "text/html": blob });
 
-    // Usa a API Clipboard para copiar o HTML
     await navigator.clipboard.write([clipboardItem]);
   } catch (err) {
     alert("Erro ao enviar para a área de transferência!");
@@ -105,13 +112,25 @@ const copyText = async () => {
             <h4>Texto enviado para a área de transferência!</h4></v-card-title
           >
           <v-divider></v-divider>
-          <v-select
-            v-model="selected"
-            item-title="label"
-            item-value="value"
-            label="Selecione o paciente"
-            :items="pacients"
-          />
+          <v-row>
+            <v-col cols="4">
+              <VTextField
+                label="Coluna com o nome do paciente"
+                v-model.number="namePosition"
+              />
+            </v-col>
+            <v-col>
+              <v-autocomplete
+                v-model="selected"
+                item-title="label"
+                item-value="value"
+                label="Selecione o paciente"
+                :items="pacients"
+                no-data-text="Selecione o paciente"
+              />
+            </v-col>
+          </v-row>
+
           <v-card-text id="to-copy">
             <template v-for="(question, i) in questionsComputed">
               <v-row v-for="qa in question" no-gutters>
